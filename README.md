@@ -36,17 +36,31 @@ isort . && flake8 . && mypy .
 
 ## Запуск
 
-- Можно исправить оценки.
-- Убрать замечания. 
-- Добавить похвальные записи.
-
-Скрипт должен лежать в корне сайта рядом с `manage.py`. Для запуска скрипта сайт должен быть поднят.
+Скрипт должен лежать в корне сайта рядом с `manage.py`. Для запуска скрипта [сайт электронного дневника](https://github.com/toor09/e-diary) должен быть поднят.
+После запуска конкретного скрипта будет запрошено имя школьника для процесса исправления оценок `run_fix_marks()`, процесса удаления замечаний `run_remove_chastisements()`.
+А для процесса добавления похвальной записи `run_create_commendation()` и `main()` кроме того, будет запрошен название предмета.
 ```
 python3 manage.py shell
 ```
+- Можно исправить оценки.
 ```python3
-from scripts import main
-main()
+>>> from scripts import run_fix_marks
+>>> run_fix_marks()
+```
+- Убрать замечания. 
+```python3
+>>> from scripts import run_remove_chastisements
+>>> run_remove_chastisements()
+```
+- Добавить похвальные записи.
+```python3
+>>> from scripts import run_create_commendation
+>>> run_create_commendation()
+```
+- Запустить все процессы:
+```python3
+>>> from scripts import main
+>>> main()
 ```
 
 ## Цели проекта

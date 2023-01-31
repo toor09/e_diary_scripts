@@ -155,7 +155,7 @@ def run_create_commendation() -> None:
 
 
 def main() -> None:
-    """Запуск всех функций для исправления оценок, удаления замечаний и добавление похвалы."""
+    """Запуск всех процессов для исправления оценок, удаления замечаний и добавление похвалы."""
     schoolkid_name = input("Введите имя: ")
     schoolkid = _get_schoolkid_instance(schoolkid_name=schoolkid_name)
     fix_marks(schoolkid=schoolkid)
