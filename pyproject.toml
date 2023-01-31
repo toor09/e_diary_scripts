@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "e-diary-scripts"
+version = "0.1.0"
+description = "E-diary scripts for grade fixing."
+authors = ["Danil Nikitin <d.nikitin.dev@gmail.com>"]
+readme = "README.md"
+packages = [{include = "e_diary_scripts"}]
+
+[tool.poetry.dependencies]
+python = ">=3.8.1,<4.0"
+
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^6.0.0"
+isort = "^5.12.0"
+mypy = "^0.991"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
