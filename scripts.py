@@ -1,4 +1,4 @@
-from datacenter.models import Mark, Schoolkid
+from datacenter.models import Chastisement, Mark, Schoolkid
 from django.db.utils import DatabaseError
 
 
@@ -21,3 +21,16 @@ def fix_marks(schoolkid: Schoolkid) -> None:
         )
     else:
         print("Отличная работа! У Вас нет плохих оценок.")
+
+
+def remove_chastisements(schoolkid: Schoolkid) -> None:
+    """Удаляет замечания."""
+    chastisements = Chastisement.objects.filter(schoolkid=schoolkid.pk)
+    if len(chastisements) > 0:
+        try:
+            chastisements_count, _ = chastisements.delete()
+            print(f"Было удалено {chastisements_count} замечаний.")
+        except DatabaseError as err:
+            raise DatabaseError(f"Что-то пошло не так: {err}.")
+    else:
+        print("Отличная работа! У Вас нет замечаний.")
