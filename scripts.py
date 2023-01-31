@@ -38,6 +38,38 @@ COMMENDATIONS = (
 )
 
 
+def _get_schoolkid_instance(schoolkid_name: str) -> Schoolkid:
+    """Возвращает инстанс модели Schoolkid."""
+    try:
+        schoolkid = Schoolkid.objects.get(full_name__contains=schoolkid_name)
+        return schoolkid
+    except ObjectDoesNotExist:
+        raise ObjectDoesNotExist(f"Школьник с именем: {schoolkid_name} не найден.")
+    except MultipleObjectsReturned:
+        raise MultipleObjectsReturned(
+            f"Найдено несколько школьников с именем: {schoolkid_name}. "
+            f"Уточните имя."
+        )
+
+
+def _get_subject_instance(subject_title: str, schoolkid: Schoolkid) -> Subject:
+    """Возвращает инстанс модели Subject."""
+    try:
+        subject = Subject.objects.get(title=subject_title, year_of_study=schoolkid.year_of_study)
+        return subject
+    except ObjectDoesNotExist:
+        raise ObjectDoesNotExist(f"Предмета с таким названием {subject_title} не существует.")
+
+
+def _create_new_commendation(commendation: dict) -> Commendation:
+    """Создает новую похвалу и возвращает инстанс модели Commendation."""
+    try:
+        new_commendation = Commendation.objects.create(**commendation)
+        return new_commendation
+    except DatabaseError as err:
+        raise DatabaseError(f"Что-то пошло не так: {err}.")
+
+
 def fix_marks(schoolkid: Schoolkid) -> None:
     """Исправляет плохие оценки: 2 и 3 на 5."""
     bad_marks = Mark.objects.filter(schoolkid=schoolkid.pk, points__lt=4)
@@ -74,18 +106,9 @@ def remove_chastisements(schoolkid: Schoolkid) -> None:
 
 def create_commendation(schoolkid_name: str, subject_title: str) -> None:
     """Добавляет похвалу."""
-    try:
-        schoolkid = Schoolkid.objects.get(full_name__contains=schoolkid_name)
-    except ObjectDoesNotExist:
-        raise ObjectDoesNotExist(f"Школьник с именем: {schoolkid_name} не найден.")
 
-    except MultipleObjectsReturned:
-        raise MultipleObjectsReturned(f"Найдено несколько школьников с именем: {schoolkid_name}.")
-
-    try:
-        subject = Subject.objects.get(title=subject_title, year_of_study=schoolkid.year_of_study)
-    except ObjectDoesNotExist:
-        raise ObjectDoesNotExist(f"Предмета с таким названием {subject_title} не существует.")
+    schoolkid = _get_schoolkid_instance(schoolkid_name=schoolkid_name)
+    subject = _get_subject_instance(subject_title=subject_title, schoolkid=schoolkid)
 
     subject_lessons = Lesson.objects.filter(
         year_of_study=schoolkid.year_of_study,
@@ -103,13 +126,22 @@ def create_commendation(schoolkid_name: str, subject_title: str) -> None:
         "teacher": random_lesson.teacher
 
     }
-
-    try:
-        new_commendation = Commendation.objects.create(**commendation)
-    except DatabaseError as err:
-        raise DatabaseError(f"Что-то пошло не так: {err}.")
-
+    new_commendation = _create_new_commendation(commendation=commendation)
     print(
         f"Была добавлена похвала с тесктом {new_commendation.text} по предмету "
         f"{new_commendation.subject} от {new_commendation.created}."
     )
+
+
+def main() -> None:
+    """Запуск всех функций для исправления оценок, удаления замечаний и добавление похвалы."""
+    schoolkid_name = input("Введите имя: ")
+    schoolkid = _get_schoolkid_instance(schoolkid_name=schoolkid_name)
+    fix_marks(schoolkid=schoolkid)
+    remove_chastisements(schoolkid=schoolkid)
+    subject_title = input("Введите название предмета: ")
+    create_commendation(schoolkid_name=schoolkid_name, subject_title=subject_title)
+
+
+if __name__ == "__main__":
+    main()
