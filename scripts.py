@@ -133,6 +133,27 @@ def create_commendation(schoolkid_name: str, subject_title: str) -> None:
     )
 
 
+def run_fix_marks() -> None:
+    """Запуск процесса корректировки оценок."""
+    schoolkid_name = input("Введите имя: ")
+    schoolkid = _get_schoolkid_instance(schoolkid_name=schoolkid_name)
+    fix_marks(schoolkid=schoolkid)
+
+
+def run_remove_chastisements() -> None:
+    """Запуск процесса удаления замечаний."""
+    schoolkid_name = input("Введите имя: ")
+    schoolkid = _get_schoolkid_instance(schoolkid_name=schoolkid_name)
+    remove_chastisements(schoolkid=schoolkid)
+
+
+def run_create_commendation() -> None:
+    """Запуск процесса добавления похвалы."""
+    schoolkid_name = input("Введите имя: ")
+    subject_title = input("Введите название предмета: ")
+    create_commendation(schoolkid_name=schoolkid_name, subject_title=subject_title)
+
+
 def main() -> None:
     """Запуск всех функций для исправления оценок, удаления замечаний и добавление похвалы."""
     schoolkid_name = input("Введите имя: ")
