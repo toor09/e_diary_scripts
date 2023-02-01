@@ -63,16 +63,13 @@ def _get_subject_instance(subject_title: str, schoolkid: Schoolkid) -> Subject:
 
 def fix_marks(schoolkid: Schoolkid) -> None:
     """Исправляет плохие оценки: 2 и 3 на 5."""
-    bad_marks = Mark.objects.filter(schoolkid=schoolkid.pk, points__lt=4)
-    start_bad_marks_count = len(bad_marks)
-    if start_bad_marks_count > 0:
-        for mark in bad_marks:
-            mark.points = 5
-        Mark.objects.bulk_update(bad_marks, ["points"])
-        final_bad_marks_count = Mark.objects.filter(schoolkid=schoolkid.pk, points__lt=4).count()
+    bad_marks = Mark.objects.filter(schoolkid=schoolkid, points__lt=4)
+    start_count = bad_marks.count()
+    if bad_marks:
+        final_count = bad_marks.update(points=5)
         print(
-            f"Было обработано {start_bad_marks_count} плохих оценок. Количество плохих оценок "
-            f"после обработки {final_bad_marks_count}."
+            f"Было обработано {start_count} плохих оценок. Количество плохих оценок "
+            f"после обработки {final_count - start_count}."
         )
     else:
         print("Отличная работа! У Вас нет плохих оценок.")
