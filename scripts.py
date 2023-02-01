@@ -1,7 +1,6 @@
 from random import choice, randint
 
 from datacenter.models import Chastisement, Commendation, Lesson, Mark, Schoolkid, Subject
-from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.db.utils import DatabaseError
 
 COMMENDATIONS = (
@@ -43,10 +42,10 @@ def _get_schoolkid_instance(schoolkid_name: str) -> Schoolkid:
     try:
         schoolkid = Schoolkid.objects.get(full_name__contains=schoolkid_name)
         return schoolkid
-    except ObjectDoesNotExist:
-        raise ObjectDoesNotExist(f"Школьник с именем: {schoolkid_name} не найден.")
-    except MultipleObjectsReturned:
-        raise MultipleObjectsReturned(
+    except Schoolkid.ObjectDoesNotExist:
+        raise Schoolkid.ObjectDoesNotExist(f"Школьник с именем: {schoolkid_name} не найден.")
+    except Schoolkid.MultipleObjectsReturned:
+        raise Schoolkid.MultipleObjectsReturned(
             f"Найдено несколько школьников с именем: {schoolkid_name}. "
             f"Уточните имя."
         )
@@ -57,8 +56,10 @@ def _get_subject_instance(subject_title: str, schoolkid: Schoolkid) -> Subject:
     try:
         subject = Subject.objects.get(title=subject_title, year_of_study=schoolkid.year_of_study)
         return subject
-    except ObjectDoesNotExist:
-        raise ObjectDoesNotExist(f"Предмета с таким названием {subject_title} не существует.")
+    except Subject.ObjectDoesNotExist:
+        raise Subject.ObjectDoesNotExist(
+            f"Предмета с таким названием {subject_title} не существует."
+        )
 
 
 def _create_new_commendation(commendation: dict) -> Commendation:
@@ -106,18 +107,14 @@ def remove_chastisements(schoolkid: Schoolkid) -> None:
 
 def create_commendation(schoolkid_name: str, subject_title: str) -> None:
     """Добавляет похвалу."""
-
     schoolkid = _get_schoolkid_instance(schoolkid_name=schoolkid_name)
     subject = _get_subject_instance(subject_title=subject_title, schoolkid=schoolkid)
-
     subject_lessons = Lesson.objects.filter(
         year_of_study=schoolkid.year_of_study,
         group_letter=schoolkid.group_letter,
         subject__title=subject.title
     )
-
     random_lesson = subject_lessons[randint(1, len(subject_lessons))]
-
     commendation = {
         "text": choice(COMMENDATIONS),
         "created": random_lesson.date,
