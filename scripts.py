@@ -1,7 +1,6 @@
 from random import choice, randint
 
 from datacenter.models import Chastisement, Commendation, Lesson, Mark, Schoolkid, Subject
-from django.db.utils import DatabaseError
 
 COMMENDATIONS = (
     "Молодец!",
@@ -62,15 +61,6 @@ def _get_subject_instance(subject_title: str, schoolkid: Schoolkid) -> Subject:
         )
 
 
-def _create_new_commendation(commendation: dict) -> Commendation:
-    """Создает новую похвалу и возвращает инстанс модели Commendation."""
-    try:
-        new_commendation = Commendation.objects.create(**commendation)
-        return new_commendation
-    except DatabaseError as err:
-        raise DatabaseError(f"Что-то пошло не так: {err}.")
-
-
 def fix_marks(schoolkid: Schoolkid) -> None:
     """Исправляет плохие оценки: 2 и 3 на 5."""
     bad_marks = Mark.objects.filter(schoolkid=schoolkid.pk, points__lt=4)
@@ -78,11 +68,7 @@ def fix_marks(schoolkid: Schoolkid) -> None:
     if start_bad_marks_count > 0:
         for mark in bad_marks:
             mark.points = 5
-        try:
-            Mark.objects.bulk_update(bad_marks, ["points"])
-        except DatabaseError as err:
-            raise DatabaseError(f"Что-то пошло не так: {err}.")
-
+        Mark.objects.bulk_update(bad_marks, ["points"])
         final_bad_marks_count = Mark.objects.filter(schoolkid=schoolkid.pk, points__lt=4).count()
         print(
             f"Было обработано {start_bad_marks_count} плохих оценок. Количество плохих оценок "
@@ -94,13 +80,10 @@ def fix_marks(schoolkid: Schoolkid) -> None:
 
 def remove_chastisements(schoolkid: Schoolkid) -> None:
     """Удаляет замечания."""
-    chastisements = Chastisement.objects.filter(schoolkid=schoolkid.pk)
-    if len(chastisements) > 0:
-        try:
-            chastisements_count, _ = chastisements.delete()
-            print(f"Было удалено {chastisements_count} замечаний.")
-        except DatabaseError as err:
-            raise DatabaseError(f"Что-то пошло не так: {err}.")
+    chastisements = Chastisement.objects.filter(schoolkid=schoolkid)
+    if chastisements:
+        chastisements_count = chastisements.delete()
+        print(f"Было удалено {chastisements_count} замечаний.")
     else:
         print("Отличная работа! У Вас нет замечаний.")
 
@@ -123,7 +106,7 @@ def create_commendation(schoolkid_name: str, subject_title: str) -> None:
         "teacher": random_lesson.teacher
 
     }
-    new_commendation = _create_new_commendation(commendation=commendation)
+    new_commendation = Commendation.objects.create(**commendation)
     print(
         f"Была добавлена похвала с тесктом {new_commendation.text} по предмету "
         f"{new_commendation.subject} от {new_commendation.created}."
