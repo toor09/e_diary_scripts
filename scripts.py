@@ -114,7 +114,7 @@ def create_commendation(schoolkid_name: str, subject_title: str) -> None:
         year_of_study=schoolkid.year_of_study,
         group_letter=schoolkid.group_letter,
         subject__title=subject.title
-    ).order_by("-date")
+    )
 
     random_lesson = subject_lessons[randint(1, len(subject_lessons))]
 
